@@ -9,7 +9,8 @@ const {document} = (new JSDOM('')).window;
 global.document = document;
 
 var $ = jQuery = require('jquery')(window);
-
+var moment = require('moment');
+moment.locale('fr');
 
 client.once('ready', () => {
     client.user.setStatus('Dispo : ' + prefix + 'help');
@@ -69,7 +70,9 @@ function getEmbedSortie(data) {
         color: 0x0099ff,
         title: data.boss + ' en ' + data.faction,
         fields: [],
-        timestamp: new Date(data.expiry),
+        footer: {
+            text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
+        },
     };
     $.each(data.variants, function (key, value) {
         embed.fields.push({
