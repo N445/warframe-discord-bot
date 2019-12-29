@@ -47,6 +47,9 @@ function help(message) {
         }, {
             name: prefix + 'help',
             value: 'Affiche cet aide'
+        }, {
+            name: 'Des recommendations ?',
+            value: 'https://github.com/N445/warframe-discord-bot/issues/new'
         }],
         timestamp: new Date(),
     };
