@@ -1,12 +1,15 @@
-#Discord BOT Warframe
+Discord BOT Warframe
+=
 
-##Installation
+Installation
+==
 ```bash
 yarn install
 node index.js
 ```
 
-##Sources
+Sources
+==
 ```
 Warframe API    => https://docs.warframestat.us
 Discord API     => https://discordjs.guide/creating-your-bot/commands-with-user-input.html#basic-arguments
