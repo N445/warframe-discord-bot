@@ -44,95 +44,70 @@ client.on('message', message => {
 client.login(token);
 
 function news(message) {
-    $.ajax({
-        url: 'https://api.warframestat.us/pc',
-        method: "GET",
-        crossOrigin: true,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader('Accept-Language', 'fr');
-        },
-        success: function (data) {
-            data = data.news;
-            var embed = {
-                color: 0x0099ff,
-                title: 'Les news',
-                fields: [],
-                timestamp: new Date(),
-            };
-            $.each(data.reverse(), function (key, value) {
-                embed.fields.push({
-                    name: moment(new Date(value.date)).fromNow(),
-                    value: value.message,
-                });
+    runUrl(function (data) {
+        data = data.news;
+        var embed = {
+            color: 0x0099ff,
+            title: 'Les news',
+            fields: [],
+            timestamp: new Date(),
+        };
+        $.each(data.reverse(), function (key, value) {
+            embed.fields.push({
+                name: moment(new Date(value.date)).fromNow(),
+                value: value.message,
             });
+        });
 
-            message.channel.send({embed: embed});
-        }
-    })
+        message.channel.send({embed: embed});
+    });
 }
 
 function alerts(message) {
-    $.ajax({
-        url: 'https://api.warframestat.us/pc',
-        method: "GET",
-        crossOrigin: true,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader('Accept-Language', 'fr');
-        },
-        success: function (data) {
-            data = data.alerts;
-            var embed = {
-                color: 0x0099ff,
-                title: 'Les alertes',
-                fields: [],
-                timestamp: new Date(),
-            };
-            $.each(data, function (key, value) {
-                embed.fields.push({
-                    name: value.mission.reward.asString,
-                    value: `Description => ${value.mission.description} \n
+    runUrl(function (data) {
+        data = data.alerts;
+        var embed = {
+            color: 0x0099ff,
+            title: 'Les alertes',
+            fields: [],
+            timestamp: new Date(),
+        };
+        $.each(data, function (key, value) {
+            embed.fields.push({
+                name: value.mission.reward.asString,
+                value: `Description => ${value.mission.description} \n
                     Lieu => ${value.mission.node} \n
                     Type => ${value.mission.type} \n
                     Faction => ${value.mission.faction} \n
                     Fin => ${moment(new Date(value.expiry)).fromNow()} \n
                     <================================================>
                     `,
-                });
             });
-
-            message.channel.send({embed: embed});
-        }
-    })
+        });
+        message.channel.send({embed: embed});
+    });
 }
 
 function sorties(message) {
-    $.ajax({
-        url: 'https://api.warframestat.us/pc',
-        method: "GET",
-        crossOrigin: true,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader('Accept-Language', 'fr');
-        },
-        success: function (data) {
-            data = data.sortie;
-            var embed = {
-                color: 0x0099ff,
-                title: data.boss + ' en ' + data.faction,
-                fields: [],
-                footer: {
-                    text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
-                },
-            };
-            $.each(data.variants, function (key, value) {
-                embed.fields.push({
-                    name: "Mission => " + value.missionType,
-                    value: "Modifier => " + value.modifier + "\n Lieu => " + value.node,
-                });
+    runUrl(function (data) {
+        data = data.sortie;
+        var embed = {
+            color: 0x0099ff,
+            title: data.boss + ' en ' + data.faction,
+            fields: [],
+            footer: {
+                text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
+            },
+        };
+        $.each(data.variants, function (key, value) {
+            embed.fields.push({
+                name: "Mission => " + value.missionType,
+                value: "Modifier => " + value.modifier + "\n Lieu => " + value.node,
             });
+        });
 
-            message.channel.send({embed: embed});
-        }
-    })
+        message.channel.send({embed: embed});
+    });
 }
 
 function help(message) {
@@ -158,6 +133,20 @@ function help(message) {
         timestamp: new Date(),
     };
     message.channel.send({embed: embed});
+}
+
+function runUrl(handleData) {
+    $.ajax({
+        url: 'https://api.warframestat.us/pc',
+        method: "GET",
+        crossOrigin: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept-Language', 'fr');
+        },
+        success: function (data) {
+            handleData(data);
+        }
+    })
 }
 
 /*
