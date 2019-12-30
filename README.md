@@ -35,7 +35,7 @@ syndicateMission [-o=desc] [-l=2]
     -o défini l'ordre d'affichage
     -l (L minuscule) défini un nombre max de résultat
 
-w!help
+help
     Affiche cet aide
 ```
 
