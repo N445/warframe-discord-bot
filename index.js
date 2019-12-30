@@ -20,30 +20,41 @@ client.once('ready', () => {
 });
 
 client.on('message', message => {
-    const cmd = message.content;
-    if (!cmd.startsWith(prefix)) return;
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+    const options = [];
+    const args = message.content.slice(prefix.length).split(' ');
+    const cmd = args.shift().toLowerCase();
+
+    $.each(args, function (key, value) {
+        options[value.split('=')[0]] = value.split('=')[1];
+    });
+
     switch (cmd) {
-        case `${prefix}news`:
-            news(message);
+        case `news`:
+            news(message, options);
             break;
-        case `${prefix}alerts`:
-            alerts(message);
+        case `alerts`:
+            alerts(message, options);
             break;
-        case `${prefix}sorties`:
-            sorties(message);
+        case `sorties`:
+            sorties(message, options);
             break;
-        case `${prefix}help`:
-            help(message);
+        case `syndicatemission`:
+            syndicateMission(message, options);
+            break;
+        case `help`:
+            help(message, options);
             break;
         default:
-            help(message);
+            help(message, options);
             break;
     }
 });
 
 client.login(token);
 
-function news(message) {
+function news(message, options) {
     runUrl(function (data) {
         data = data.news;
         var embed = {
@@ -63,7 +74,7 @@ function news(message) {
     });
 }
 
-function alerts(message) {
+function alerts(message, options) {
     runUrl(function (data) {
         data = data.alerts;
         var embed = {
@@ -88,7 +99,7 @@ function alerts(message) {
     });
 }
 
-function sorties(message) {
+function sorties(message, options) {
     runUrl(function (data) {
         data = data.sortie;
         var embed = {
@@ -110,7 +121,47 @@ function sorties(message) {
     });
 }
 
-function help(message) {
+function syndicateMission(message, options) {
+    runUrl(function (data) {
+        var data = data.syndicateMissions;
+
+        if ('desc' === options['-o']) {
+            data = data.reverse();
+        }
+
+        //limit = 2;
+        if (options['-l'] != undefined) {
+            var limit = options['-l'];
+        }
+
+        if(limit != undefined){
+            data = data.slice(0, limit);
+        }
+
+        var embed = {
+            color: 0x0099ff,
+            title: 'Missions syndicates',
+            fields: [],
+            timestamp: new Date(),
+        };
+        $.each(data, function (key, mission) {
+            /*var jobs = '';
+            $.each(mission.jobs, function (key, job) {
+                jobs += `Type => **${job.type}** \n`;
+            });*/
+
+            embed.fields.push({
+                name: mission.syndicate,
+                //value: `${jobs} \n Fin => ${moment(new Date(mission.expiry)).fromNow()}`,
+                value: `Fin => ${moment(new Date(mission.expiry)).fromNow()}`,
+                inline: true,
+            });
+        });
+        message.channel.send({embed: embed});
+    });
+}
+
+function help(message, options) {
     var embed = {
         color: 0x0099ff,
         title: 'Liste des commandes',
@@ -123,6 +174,9 @@ function help(message) {
         }, {
             name: `${prefix}sorties`,
             value: 'Liste les 3 sorties du jour'
+        }, {
+            name: `${prefix}syndicateMission [-o=desc] [-l=2]`,
+            value: 'Liste les missions syndicate\n **-o** défini l\'ordre d\'affichage\n**-l** (L minuscule) défini un nombre max de résultat'
         }, {
             name: `${prefix}help`,
             value: 'Affiche cet aide'
