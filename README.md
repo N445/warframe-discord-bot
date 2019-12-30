@@ -3,6 +3,16 @@ Discord BOT Warframe
 
 Installation
 ==
+
+Créate auth.json file in root dir
+
+```json
+{
+  "prefix": "prefix",
+  "token": "token"
+}
+```
+
 ```bash
 yarn install
 node index.js
