@@ -30,7 +30,15 @@ client.on('message', message => {
         options[value.split('=')[0]] = value.split('=')[1];
     });
 
-    switch (cmd) {
+    console.log(cmd, cmd in getActions());
+
+    if (cmd in getActions()) {
+        getActions()[cmd].action(message, options);
+    } else {
+        helpFunction(message, options);
+    }
+
+    /*switch (cmd) {
         case `news`:
             news(message, options);
             break;
@@ -49,12 +57,12 @@ client.on('message', message => {
         default:
             help(message, options);
             break;
-    }
+    }*/
 });
 
 client.login(token);
 
-function news(message, options) {
+const newsFunction = function news(message, options) {
     runUrl(function (data) {
         data = data.news;
         var embed = {
@@ -74,7 +82,7 @@ function news(message, options) {
     });
 }
 
-function alerts(message, options) {
+const alertsFunction = function alerts(message, options) {
     runUrl(function (data) {
         data = data.alerts;
         var embed = {
@@ -99,7 +107,7 @@ function alerts(message, options) {
     });
 }
 
-function sorties(message, options) {
+const sortiesFunction = function sorties(message, options) {
     runUrl(function (data) {
         data = data.sortie;
         var embed = {
@@ -121,7 +129,7 @@ function sorties(message, options) {
     });
 }
 
-function syndicateMission(message, options) {
+const syndicateMissionFunction = function syndicateMission(message, options) {
     runUrl(function (data) {
         var data = data.syndicateMissions;
 
@@ -134,7 +142,7 @@ function syndicateMission(message, options) {
             var limit = options['-l'];
         }
 
-        if(limit != undefined){
+        if (limit != undefined) {
             data = data.slice(0, limit);
         }
 
@@ -145,11 +153,6 @@ function syndicateMission(message, options) {
             timestamp: new Date(),
         };
         $.each(data, function (key, mission) {
-            /*var jobs = '';
-            $.each(mission.jobs, function (key, job) {
-                jobs += `Type => **${job.type}** \n`;
-            });*/
-
             embed.fields.push({
                 name: mission.syndicate,
                 //value: `${jobs} \n Fin => ${moment(new Date(mission.expiry)).fromNow()}`,
@@ -161,31 +164,24 @@ function syndicateMission(message, options) {
     });
 }
 
-function help(message, options) {
+const helpFunction = function help(message, options) {
     var embed = {
         color: 0x0099ff,
         title: 'Liste des commandes',
-        fields: [{
-            name: `${prefix}news`,
-            value: 'Liste les dernières news'
-        }, {
-            name: `${prefix}alerts`,
-            value: 'Liste les alertes'
-        }, {
-            name: `${prefix}sorties`,
-            value: 'Liste les 3 sorties du jour'
-        }, {
-            name: `${prefix}syndicateMission [-o=desc] [-l=2]`,
-            value: 'Liste les missions syndicate\n **-o** défini l\'ordre d\'affichage\n**-l** (L minuscule) défini un nombre max de résultat'
-        }, {
-            name: `${prefix}help`,
-            value: 'Affiche cet aide'
-        }, {
-            name: 'Des recommendations ?',
-            value: 'https://github.com/N445/warframe-discord-bot/issues/new'
-        }],
+        fields: [],
         timestamp: new Date(),
     };
+    $.each(getActions(), function (commande, value) {
+        var helpCmd = value.altLabel ? value.altLabel : commande
+        embed.fields.push({
+            name: prefix + helpCmd,
+            value: value.description
+        });
+    });
+    embed.fields.push({
+        name: 'Des recommendations ?',
+        value: 'https://github.com/N445/warframe-discord-bot/issues/new'
+    });
     message.channel.send({embed: embed});
 }
 
@@ -201,6 +197,32 @@ function runUrl(handleData) {
             handleData(data);
         }
     })
+}
+
+function getActions() {
+    return {
+        'news': {
+            action: newsFunction,
+            description: 'Liste les dernières news'
+        },
+        'alerts': {
+            action: alertsFunction,
+            description: 'Liste les alertes'
+        },
+        'sorties': {
+            action: sortiesFunction,
+            description: 'Liste les 3 sorties du jour'
+        },
+        'syndicateMission': {
+            action: syndicateMissionFunction,
+            altLabel: 'syndicateMission [-o=desc] [-l=2]',
+            description: 'Liste les missions syndicate\n **-o** défini l\'ordre d\'affichage\n**-l** (L minuscule) défini un nombre max de résultat'
+        },
+        'help': {
+            action: helpFunction,
+            description: 'Affiche cet aide'
+        },
+    };
 }
 
 /*
