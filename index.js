@@ -94,7 +94,8 @@ function alerts(message) {
                     Lieu => ${value.mission.node} \n
                     Type => ${value.mission.type} \n
                     Faction => ${value.mission.faction} \n
-                    Fin => ${moment(new Date(value.expiry)).fromNow()}
+                    Fin => ${moment(new Date(value.expiry)).fromNow()} \n
+                    <================================================>
                     `,
                 });
             });
