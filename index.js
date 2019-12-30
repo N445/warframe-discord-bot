@@ -13,20 +13,20 @@ var moment = require('moment');
 moment.locale('fr');
 
 client.once('ready', () => {
-    client.user.setStatus('Dispo : ' + prefix + 'help');
+    client.user.setStatus(`Dispo : ${prefix}help`);
     console.log('Ready!');
 
-    client.user.setActivity('Runing : ' + prefix + 'help', {type: 'PLAYING'});
+    client.user.setActivity(`Runing : ${prefix}help`, {type: 'PLAYING'});
 });
 
 client.on('message', message => {
     const cmd = message.content;
     if (!cmd.startsWith(prefix)) return;
     switch (cmd) {
-        case prefix + 'sorties':
+        case `${prefix}sorties`:
             sorties(message);
             break;
-        case prefix + 'help':
+        case `${prefix}help`:
             help(message);
             break;
         default:
@@ -42,10 +42,10 @@ function help(message) {
         color: 0x0099ff,
         title: 'Liste des commandes',
         fields: [{
-            name: prefix + 'sorties',
+            name: `${prefix}sorties`,
             value: 'Liste les 3 sorties du jour'
         }, {
-            name: prefix + 'help',
+            name: `${prefix}help`,
             value: 'Affiche cet aide'
         }, {
             name: 'Des recommendations ?',
@@ -66,7 +66,6 @@ function sorties(message) {
         }
     })
 }
-
 
 function getEmbedSortie(data) {
     var embed = {
