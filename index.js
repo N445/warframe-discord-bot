@@ -26,6 +26,9 @@ client.on('message', message => {
         case `${prefix}news`:
             news(message);
             break;
+        case `${prefix}alerts`:
+            alerts(message);
+            break;
         case `${prefix}sorties`:
             sorties(message);
             break;
@@ -60,6 +63,39 @@ function news(message) {
                 embed.fields.push({
                     name: moment(new Date(value.date)).fromNow(),
                     value: value.message,
+                });
+            });
+
+            message.channel.send({embed: embed});
+        }
+    })
+}
+
+function alerts(message) {
+    $.ajax({
+        url: 'https://api.warframestat.us/pc',
+        method: "GET",
+        crossOrigin: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept-Language', 'fr');
+        },
+        success: function (data) {
+            data = data.alerts;
+            var embed = {
+                color: 0x0099ff,
+                title: 'Les alertes',
+                fields: [],
+                timestamp: new Date(),
+            };
+            $.each(data, function (key, value) {
+                embed.fields.push({
+                    name: value.mission.reward.asString,
+                    value: `Description => ${value.mission.description} \n
+                    Lieu => ${value.mission.node} \n
+                    Type => ${value.mission.type} \n
+                    Faction => ${value.mission.faction} \n
+                    Fin => ${moment(new Date(value.expiry)).fromNow()}
+                    `,
                 });
             });
 
@@ -103,6 +139,12 @@ function help(message) {
         color: 0x0099ff,
         title: 'Liste des commandes',
         fields: [{
+            name: `${prefix}news`,
+            value: 'Liste les dernières news'
+        }, {
+            name: `${prefix}alerts`,
+            value: 'Liste les alertes'
+        }, {
             name: `${prefix}sorties`,
             value: 'Liste les 3 sorties du jour'
         }, {
