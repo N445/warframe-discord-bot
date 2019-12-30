@@ -23,6 +23,9 @@ client.on('message', message => {
     const cmd = message.content;
     if (!cmd.startsWith(prefix)) return;
     switch (cmd) {
+        case `${prefix}news`:
+            news(message);
+            break;
         case `${prefix}sorties`:
             sorties(message);
             break;
@@ -36,6 +39,64 @@ client.on('message', message => {
 });
 
 client.login(token);
+
+function news(message) {
+    $.ajax({
+        url: 'https://api.warframestat.us/pc',
+        method: "GET",
+        crossOrigin: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept-Language', 'fr');
+        },
+        success: function (data) {
+            data = data.news;
+            var embed = {
+                color: 0x0099ff,
+                title: 'Les news',
+                fields: [],
+                timestamp: new Date(),
+            };
+            $.each(data.reverse(), function (key, value) {
+                embed.fields.push({
+                    name: moment(new Date(value.date)).fromNow(),
+                    value: value.message,
+                });
+            });
+
+            message.channel.send({embed: embed});
+        }
+    })
+}
+
+function sorties(message) {
+    $.ajax({
+        url: 'https://api.warframestat.us/pc',
+        method: "GET",
+        crossOrigin: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept-Language', 'fr');
+        },
+        success: function (data) {
+            data = data.sortie;
+            var embed = {
+                color: 0x0099ff,
+                title: data.boss + ' en ' + data.faction,
+                fields: [],
+                footer: {
+                    text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
+                },
+            };
+            $.each(data.variants, function (key, value) {
+                embed.fields.push({
+                    name: "Mission => " + value.missionType,
+                    value: "Modifier => " + value.modifier + "\n Lieu => " + value.node,
+                });
+            });
+
+            message.channel.send({embed: embed});
+        }
+    })
+}
 
 function help(message) {
     var embed = {
@@ -54,36 +115,6 @@ function help(message) {
         timestamp: new Date(),
     };
     message.channel.send({embed: embed});
-}
-
-function sorties(message) {
-    $.ajax({
-        url: 'https://api.warframestat.us/pc/sortie',
-        method: "GET",
-        crossOrigin: true,
-        success: function (data) {
-            message.channel.send({embed: getEmbedSortie(data)});
-        }
-    })
-}
-
-function getEmbedSortie(data) {
-    var embed = {
-        color: 0x0099ff,
-        title: data.boss + ' en ' + data.faction,
-        fields: [],
-        footer: {
-            text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
-        },
-    };
-    $.each(data.variants, function (key, value) {
-        embed.fields.push({
-            name: "Mission => " + value.missionType,
-            value: "Modifier => " + value.modifier + "\n Lieu => " + value.node,
-        });
-    });
-
-    return embed;
 }
 
 /*
