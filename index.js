@@ -20,6 +20,7 @@ client.once('ready', () => {
 });
 
 client.on('message', message => {
+    // Si le message ne commence pas parle préfix ou si il est envoyé par le bot alors on zappe
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const options = [];
@@ -30,34 +31,12 @@ client.on('message', message => {
         options[value.split('=')[0]] = value.split('=')[1];
     });
 
-    console.log(cmd, cmd in getActions());
-
+    // Parcours les actions et appèle dynamiquement les fonctions qui correspondent
     if (cmd in getActions()) {
         getActions()[cmd].action(message, options);
     } else {
         helpFunction(message, options);
     }
-
-    /*switch (cmd) {
-        case `news`:
-            news(message, options);
-            break;
-        case `alerts`:
-            alerts(message, options);
-            break;
-        case `sorties`:
-            sorties(message, options);
-            break;
-        case `syndicatemission`:
-            syndicateMission(message, options);
-            break;
-        case `help`:
-            help(message, options);
-            break;
-        default:
-            help(message, options);
-            break;
-    }*/
 });
 
 client.login(token);
@@ -65,17 +44,12 @@ client.login(token);
 const newsFunction = function news(message, options) {
     runUrl(function (data) {
         data = data.news;
-        var embed = {
-            color: 0x0099ff,
-            title: 'Les news',
-            fields: [],
-            timestamp: new Date(),
-        };
+        const embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('Les news')
+            .setTimestamp(new Date());
         $.each(data.reverse(), function (key, value) {
-            embed.fields.push({
-                name: moment(new Date(value.date)).fromNow(),
-                value: value.message,
-            });
+            embed.addField(moment(new Date(value.date)).fromNow(), value.message);
         });
 
         message.channel.send({embed: embed});
@@ -85,23 +59,20 @@ const newsFunction = function news(message, options) {
 const alertsFunction = function alerts(message, options) {
     runUrl(function (data) {
         data = data.alerts;
-        var embed = {
-            color: 0x0099ff,
-            title: 'Les alertes',
-            fields: [],
-            timestamp: new Date(),
-        };
+
+        const embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('Les alertes')
+            .setTimestamp(new Date());
+
         $.each(data, function (key, value) {
-            embed.fields.push({
-                name: value.mission.reward.asString,
-                value: `Description => ${value.mission.description} \n
+            embed.addField(value.mission.reward.asString, `Description => ${value.mission.description} \n
                     Lieu => ${value.mission.node} \n
                     Type => ${value.mission.type} \n
                     Faction => ${value.mission.faction} \n
                     Fin => ${moment(new Date(value.expiry)).fromNow()} \n
                     <================================================>
-                    `,
-            });
+                    `);
         });
         message.channel.send({embed: embed});
     });
@@ -110,19 +81,13 @@ const alertsFunction = function alerts(message, options) {
 const sortiesFunction = function sorties(message, options) {
     runUrl(function (data) {
         data = data.sortie;
-        var embed = {
-            color: 0x0099ff,
-            title: data.boss + ' en ' + data.faction,
-            fields: [],
-            footer: {
-                text: 'Expire dans ' + moment(new Date(data.expiry)).fromNow(),
-            },
-        };
+        const embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(data.boss + ' en ' + data.faction)
+            .setFooter('Expire dans ' + moment(new Date(data.expiry)).fromNow());
+
         $.each(data.variants, function (key, value) {
-            embed.fields.push({
-                name: "Mission => " + value.missionType,
-                value: "Modifier => " + value.modifier + "\n Lieu => " + value.node,
-            });
+            embed.addField("Mission => " + value.missionType, "Modifier => " + value.modifier + "\n Lieu => " + value.node);
         });
 
         message.channel.send({embed: embed});
@@ -146,43 +111,53 @@ const syndicateMissionFunction = function syndicateMission(message, options) {
             data = data.slice(0, limit);
         }
 
-        var embed = {
-            color: 0x0099ff,
-            title: 'Missions syndicates',
-            fields: [],
-            timestamp: new Date(),
-        };
+        const embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('Missions syndicates')
+            .setTimestamp(new Date())
+        ;
+
         $.each(data, function (key, mission) {
-            embed.fields.push({
-                name: mission.syndicate,
-                //value: `${jobs} \n Fin => ${moment(new Date(mission.expiry)).fromNow()}`,
-                value: `Fin => ${moment(new Date(mission.expiry)).fromNow()}`,
-                inline: true,
-            });
+            embed.addField(mission.syndicate, `Fin => ${moment(new Date(mission.expiry)).fromNow()}`, true);
         });
         message.channel.send({embed: embed});
     });
 }
 
 const helpFunction = function help(message, options) {
-    var embed = {
-        color: 0x0099ff,
-        title: 'Liste des commandes',
-        fields: [],
-        timestamp: new Date(),
-    };
+    const embed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle('Liste des commandes')
+        .setTimestamp(new Date())
+    ;
+
     $.each(getActions(), function (commande, value) {
         var helpCmd = value.altLabel ? value.altLabel : commande
-        embed.fields.push({
-            name: prefix + helpCmd,
-            value: value.description
-        });
+        embed.addField(prefix + helpCmd, value.description);
     });
-    embed.fields.push({
-        name: 'Des recommendations ?',
-        value: 'https://github.com/N445/warframe-discord-bot/issues/new'
-    });
+    embed.addField('Des recommendations ?', 'https://github.com/N445/warframe-discord-bot/issues/new');
+
     message.channel.send({embed: embed});
+}
+
+const testFunction = function (message, option) {
+    const exampleEmbed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle('Some title')
+        .setURL('https://discord.js.org/')
+        .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+        .setDescription('Some description here')
+        .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+        .addField('Regular field title', 'Some value here')
+        .addBlankField()
+        .addField('Inline field title', 'Some value here', true)
+        .addField('Inline field title', 'Some value here', true)
+        .addField('Inline field title', 'Some value here', true)
+        .setImage('https://i.imgur.com/wSTFkRM.png')
+        .setTimestamp()
+        .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+
+    message.channel.send(exampleEmbed);
 }
 
 function runUrl(handleData) {
@@ -221,6 +196,10 @@ function getActions() {
         'help': {
             action: helpFunction,
             description: 'Affiche cet aide'
+        },
+        'test': {
+            action: testFunction,
+            description: 'Commande de test'
         },
     };
 }
