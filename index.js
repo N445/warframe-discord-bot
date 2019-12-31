@@ -44,10 +44,8 @@ client.login(token);
 const newsFunction = function news(message, options) {
     runUrl(function (data) {
         data = data.news;
-        const embed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Les news')
-            .setTimestamp(new Date());
+        const embed = getBaseEmbed();
+        embed.setTitle('Les news').setTimestamp(new Date());
         $.each(data.reverse(), function (key, value) {
             embed.addField(moment(new Date(value.date)).fromNow(), value.message);
         });
@@ -60,10 +58,8 @@ const alertsFunction = function alerts(message, options) {
     runUrl(function (data) {
         data = data.alerts;
 
-        const embed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Les alertes')
-            .setTimestamp(new Date());
+        const embed = getBaseEmbed();
+        embed.setTitle('Les alertes');
 
         $.each(data, function (key, value) {
             embed.addField(value.mission.reward.asString, `Description => ${value.mission.description} \n
@@ -81,9 +77,8 @@ const alertsFunction = function alerts(message, options) {
 const sortiesFunction = function sorties(message, options) {
     runUrl(function (data) {
         data = data.sortie;
-        const embed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(data.boss + ' en ' + data.faction)
+        const embed = getBaseEmbed();
+        embed.setTitle(data.boss + ' en ' + data.faction)
             .setFooter('Expire dans ' + moment(new Date(data.expiry)).fromNow());
 
         $.each(data.variants, function (key, value) {
@@ -111,11 +106,8 @@ const syndicateMissionFunction = function syndicateMission(message, options) {
             data = data.slice(0, limit);
         }
 
-        const embed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Missions syndicates')
-            .setTimestamp(new Date())
-        ;
+        const embed = getBaseEmbed();
+        embed.setTitle('Missions syndicates');
 
         $.each(data, function (key, mission) {
             embed.addField(mission.syndicate, `Fin => ${moment(new Date(mission.expiry)).fromNow()}`, true);
@@ -125,9 +117,8 @@ const syndicateMissionFunction = function syndicateMission(message, options) {
 }
 
 const helpFunction = function help(message, options) {
-    const embed = new Discord.MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('Liste des commandes')
+    const embed = getBaseEmbed();
+    embed.setTitle('Liste des commandes')
         .setTimestamp(new Date())
     ;
 
@@ -158,6 +149,14 @@ const testFunction = function (message, option) {
         .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
 
     message.channel.send(exampleEmbed);
+}
+
+function getBaseEmbed(){
+    return new Discord.MessageEmbed()
+        .setTitle('Warframe bot')
+        .setColor('BLUE')
+        .attachFiles(['./assets/images/bot-logo.jpg'])
+        .setAuthor('Warframe bot', 'attachment://bot-logo.jpg', 'https://github.com/N445/warframe-discord-bot')
 }
 
 function runUrl(handleData) {
