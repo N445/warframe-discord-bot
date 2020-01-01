@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const Emoji =  require("discord-emoji");
+const Emoji = require("discord-emoji");
+const Items = require('warframe-items')
+const Patchlogs = require('warframe-patchlogs')
 const {prefix, token} = require('./auth.json');
 
 var jsdom = require("jsdom");
@@ -117,6 +119,31 @@ const syndicateMissionFunction = function syndicateMission(message, options) {
     });
 }
 
+const changeLogFunction = function changeLog(message, options) {
+    var limit = 6;
+    var search = {};
+    if (options['-n'] != undefined) {
+        search.name = options['-n'];
+    }
+    if (options['-t'] != undefined) {
+        search.type = options['-n'];
+    }
+    if (options['-l'] != undefined) {
+        limit = options['-l'];
+    }
+    console.log(isEmpty(search), search);
+    if (!isEmpty(search)) {
+        patchs = Patchlogs.getItemChanges(search);
+    } else {
+        patchs = Patchlogs.posts;
+    }
+
+    $.each(patchs.slice(0, limit), function (key, value) {
+        console.log(value);
+    })
+
+}
+
 const helpFunction = function help(message, options) {
     const embed = getBaseEmbed();
     embed.setTitle('Liste des commandes')
@@ -133,10 +160,18 @@ const helpFunction = function help(message, options) {
 }
 
 const testFunction = function (message, option) {
+    /*const items = new Items().filter(i => i.name === 'Baza');
+    $.each(items, function (key, value) {
+        console.log(value);
+    })*/
+    const patchs = Patchlogs.getItemChanges({'name': 'Ivara Prime', 'type': 'warframe'});
+    $.each(patchs, function (key, value) {
+        console.log(value);
+    })
     message.channel.send(Emoji.nature.cat);
 }
 
-function getBaseEmbed(){
+function getBaseEmbed() {
     return new Discord.MessageEmbed()
         .setTitle('Warframe bot')
         .setColor('BLUE')
@@ -172,10 +207,14 @@ function getActions() {
             action: sortiesFunction,
             description: 'Liste les 3 sorties du jour'
         },
-        'syndicateMission': {
+        'syndicatemission': {
             action: syndicateMissionFunction,
             altLabel: 'syndicateMission [-o=desc] [-l=2]',
             description: 'Liste les missions syndicate\n **-o** défini l\'ordre d\'affichage\n**-l** (L minuscule) défini un nombre max de résultat'
+        },
+        'changelog': {
+            action: changeLogFunction,
+            description: 'changelog'
         },
         'help': {
             action: helpFunction,
@@ -186,6 +225,14 @@ function getActions() {
             description: 'Commande de test'
         },
     };
+}
+
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
 }
 
 /*
