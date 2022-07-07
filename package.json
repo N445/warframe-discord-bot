@@ -9,7 +9,7 @@
     "eslint": "^6.8.0",
     "jquery": "^3.4.1",
     "jsdom": "^15.2.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "warframe-items": "^1.746.0",
     "warframe-patchlogs": "^1.291.0"
   }
